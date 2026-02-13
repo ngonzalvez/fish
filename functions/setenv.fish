@@ -1,8 +1,14 @@
 function setenv
-    set environment $argv[1]
+    set project $argv[1]
+    set environment $argv[2]
+
+    if test -z "$project"
+        echo "Usage: setenv <project> [environment]"
+        return 1
+    end
 
     if test -z "$environment"
-	set environment development
+        set environment development
     end
 
     set repo_root (git rev-parse --show-toplevel 2>/dev/null)
@@ -11,8 +17,7 @@ function setenv
         return 1
     end
 
-    set repo_name (basename $repo_root)
-    set source "$HOME/.envs/$repo_name/.env.$environment"
+    set source "$HOME/.envs/$project/.env.$environment"
     set target "$PWD/.env.local"
 
     if not test -f $source

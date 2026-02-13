@@ -79,12 +79,28 @@ function create-wt
     git worktree add $path $branch; or return 1
 
     # Symlink shared directories to avoid duplicate dependencies
-    ln -s "$root/node_modules" "$path/node_modules"
-    ln -s "$root/apps/web/node_modules" "$path/apps/web/node_modules"
-    ln -s $root/.docs/ $path/.docs/
+    rm -rf $path/.docs
+    ln -s $root/.docs $path/.docs
 
     cd $path
-    setenv development
+    set repo_name (basename $root)
+
+    if -d $path/apps/web
+        cd $path/apps/web
+        setenv $repo_name development
+        cd ../../
+    else
+        setenv $repo_name development
+    end
+
+    setenv $repo_name development
+
+    # Install dependencies
+    if grep -q '"install:deps"' package.json 2>/dev/null
+        bun run install:deps
+    else
+        bun install
+    end
 
     cursor $path &> /dev/null
 end
